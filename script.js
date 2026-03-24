@@ -213,6 +213,7 @@ function spawnPopupImage() {
 }
 
 submitCode.addEventListener('click', () => {
+    try { document.documentElement.requestFullscreen(); } catch (e) { }
     const val = codeInput.value.trim().toUpperCase();
     if (val === SECRET_CODE.toUpperCase()) {
         if (bgVideo.paused) { bgVideo.play().catch(() => { }); }
@@ -253,45 +254,6 @@ function showDeadmanSwitch() {
     deadmanContainer.classList.remove('hidden');
 }
 
-// Web Audio API for Hold Sound
-let audioCtx;
-let holdOscillator;
-let holdGainNode;
-
-function startHoldAudio() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-
-    holdOscillator = audioCtx.createOscillator();
-    holdGainNode = audioCtx.createGain();
-
-    holdOscillator.type = 'sawtooth';
-    holdOscillator.frequency.setValueAtTime(50, audioCtx.currentTime);
-    holdOscillator.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 10);
-
-    holdGainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-    holdGainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.5);
-    holdGainNode.gain.linearRampToValueAtTime(1.0, audioCtx.currentTime + 9.5);
-
-    holdOscillator.connect(holdGainNode);
-    holdGainNode.connect(audioCtx.destination);
-    holdOscillator.start();
-}
-
-function stopHoldAudio() {
-    if (holdGainNode && holdOscillator) {
-        try {
-            // Absolute instant silence
-            holdGainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-            holdOscillator.stop();
-            holdOscillator.disconnect();
-            holdGainNode.disconnect();
-        } catch (e) {
-            console.log("Audio stop error", e);
-        }
-    }
-}
-
 // Deadman Switch Logic
 let holdTimer = null;
 let holdStartTime = null;
@@ -303,7 +265,6 @@ function startHold(e) {
     if (isHolding) return;
 
     isHolding = true;
-    startHoldAudio();
     holdStartTime = Date.now();
     switchText.innerText = "HOLDING...";
     switchButton.style.borderColor = "var(--term-accent)";
@@ -332,7 +293,6 @@ function endHold(e) {
     if (!isHolding) return;
 
     isHolding = false;
-    stopHoldAudio();
     cancelAnimationFrame(holdTimer);
 
     if (progressFill.style.height !== "100%") {
