@@ -68,7 +68,25 @@
             <!-- Testo Subliminale Flashing -->
             <h1 id="flash-text" class="flash-text hidden">OBEY</h1>
 
-            <!-- Le immagini pop-up animate (tramite Javascript) -->
+            <div id="click-hint" class="click-hint">CLICK TO SURRENDER</div>
+        </div>
+
+        <!-- 5. SECOND CODE / PAYWALL -->
+        <div class="code-input-container hidden" id="second-code-container" style="z-index: 200;">
+            <div class="glass-panel text-center"
+                style="border-color: rgba(255,0,0,0.5); box-shadow: 0 0 50px rgba(255,0,0,0.2);">
+                <i data-lucide="skull" class="mb-1"
+                    style="color:var(--term-error); width:32px; height:32px; margin: 0 auto;"></i>
+                <h2 style="color: var(--term-error);">PAY TRIBUTE</h2>
+                <p>Send a tribute on <a href="https://throne.com/" target="_blank" style="color:#fff;">Throne</a> to get
+                    the code. Or surrender.</p>
+                <div class="input-group">
+                    <input type="text" id="second-code-input" placeholder="ENTER 2ND CODE..." autocomplete="off"
+                        spellcheck="false" style="border-color: rgba(255,0,0,0.3); color: var(--term-error);">
+                    <button id="submit-second-code" style="background: var(--term-error); color: #fff;">SUBMIT</button>
+                </div>
+                <div id="second-code-error" class="hidden error-text" style="color: #fff;">INVALID. TRY HARDER.</div>
+            </div>
         </div>
 
     </div>
