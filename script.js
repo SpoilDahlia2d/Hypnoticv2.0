@@ -1,7 +1,8 @@
 // ==========================================
 // CONFIGURATION
 // ==========================================
-const SECRET_CODE = "DEVOTION";
+const SECRET_CODE = "DEVOTION-432";
+const SECOND_CODE = "DAHLIA-043";
 
 // Queste immagini DEVONO essere caricate nella cartella "images" che ti ho appena creato
 // Es: images/spam1.jpg, images/spam2.png ecc.
@@ -39,6 +40,11 @@ const codeContainer = document.getElementById('code-container');
 const codeInput = document.getElementById('code-input');
 const submitCode = document.getElementById('submit-code');
 const codeError = document.getElementById('code-error');
+
+const secondCodeContainer = document.getElementById('second-code-container');
+const secondCodeInput = document.getElementById('second-code-input');
+const submitSecondCode = document.getElementById('submit-second-code');
+const secondCodeError = document.getElementById('second-code-error');
 
 const deadmanContainer = document.getElementById('deadman-container');
 const switchButton = document.getElementById('switch-button');
@@ -99,67 +105,120 @@ function showCodeInput() {
     codeInput.focus();
 }
 
-function startBrainwash() {
+function startBrainwash(isFrantic = false) {
     deadmanContainer.classList.add('hidden');
     codeContainer.classList.add('hidden');
+    if (secondCodeContainer) secondCodeContainer.classList.add('hidden');
     brainwashContainer.classList.remove('hidden');
 
     // Play multimedia
     bgVideo.play().catch(e => console.log("Video autoplay blocked", e));
-    bgAudio.volume = 1.0;
+    bgAudio.volume = isFrantic ? 1.0 : 0.8;
     bgAudio.play().catch(e => console.log("Audio autoplay blocked", e));
 
+    if (isFrantic) {
+        bgVideo.playbackRate = 2.0;
+        bgAudio.playbackRate = 1.5;
+        bgVideo.style.filter = "saturate(3) hue-rotate(180deg) invert(0.2)";
+    }
+
     // Flash Text Routine
-    setInterval(() => {
+    const flashIntervalSpeed = isFrantic ? 200 : 400;
+    const flashTextInterval = setInterval(() => {
         flashText.innerText = SPAM_WORDS[Math.floor(Math.random() * SPAM_WORDS.length)];
         flashText.classList.remove('hidden');
-        setTimeout(() => flashText.classList.add('hidden'), 100 + Math.random() * 200);
-    }, 400 + Math.random() * 600);
-
-    // Pop-up Overlapping Image Routine (Crazy WoW Effect)
-    setInterval(() => {
-        if (FLASH_IMAGES.length > 0) {
-            const imgEl = document.createElement('img');
-            // Carica dalle cartella images/
-            imgEl.src = "images/" + FLASH_IMAGES[Math.floor(Math.random() * FLASH_IMAGES.length)];
-            imgEl.className = 'popup-image';
-
-            // Random styling for a crazy overlapping look
-            const size = 15 + Math.random() * 25; // 15% to 40% screen width
-            const left = Math.random() * (100 - size);
-            const top = Math.random() * (100 - size);
-            const rotation = (Math.random() - 0.5) * 50; // -25deg to +25deg
-
-            imgEl.style.width = `${size}vw`;
-            imgEl.style.left = `${left}vw`;
-            imgEl.style.top = `${top}vh`;
-            imgEl.style.transform = `rotate(${rotation}deg) scale(0)`;
-            imgEl.style.opacity = '1';
-
-            brainwashContainer.appendChild(imgEl);
-
-            // Trigger bounch entry animation
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    imgEl.style.transform = `rotate(${rotation}deg) scale(1)`;
-                });
-            });
-
-            // Remove after 4 seconds slowly falling down/zooming out
-            setTimeout(() => {
-                imgEl.style.opacity = '0';
-                imgEl.style.transform = `rotate(${rotation + (Math.random() > 0.5 ? 20 : -20)}deg) scale(1.15) translateY(50px)`;
-                setTimeout(() => imgEl.remove(), 600); // Wait for CSS opacity finish
-            }, 4000);
+        if (isFrantic) {
+            flashText.style.color = "red";
+            flashText.style.textShadow = "0 0 50px red";
         }
-    }, 800); // 800ms spawns a new popup continuously
+        setTimeout(() => flashText.classList.add('hidden'), 50 + Math.random() * 100);
+    }, flashIntervalSpeed + Math.random() * (isFrantic ? 200 : 600));
+
+    // Pop-up Overlapping Image Routine
+    const spawnSpeed = isFrantic ? 300 : 800;
+    const brainwashInterval = setInterval(spawnPopupImage, spawnSpeed);
+
+    // Interactivity during spam phase
+    function triggerGlitchExplosion() {
+        const burstCount = isFrantic ? 15 : 5;
+        for (let j = 0; j < burstCount; j++) setTimeout(spawnPopupImage, j * 30);
+        bgVideo.style.filter = isFrantic ? "invert(1) hue-rotate(90deg) contrast(3)" : "invert(1) hue-rotate(90deg) contrast(2)";
+        clearTimeout(brainwashContainer.glitchTimeout);
+        brainwashContainer.glitchTimeout = setTimeout(() => {
+            if (isFrantic) {
+                bgVideo.style.filter = "saturate(3) hue-rotate(180deg) invert(0.2)";
+            } else {
+                bgVideo.style.filter = "none";
+            }
+        }, 150);
+    }
+
+    // Remove old listeners to prevent duplicates if restarting
+    if (brainwashContainer._glitchHandler) {
+        brainwashContainer.removeEventListener('mousedown', brainwashContainer._glitchHandler);
+        brainwashContainer.removeEventListener('touchstart', brainwashContainer._touchHandler);
+    }
+
+    brainwashContainer._glitchHandler = triggerGlitchExplosion;
+    brainwashContainer._touchHandler = (e) => { e.preventDefault(); triggerGlitchExplosion(); };
+
+    brainwashContainer.addEventListener('mousedown', brainwashContainer._glitchHandler);
+    brainwashContainer.addEventListener('touchstart', brainwashContainer._touchHandler, { passive: false });
+
+    // 1 minute timer for Phase 1
+    if (!isFrantic) {
+        setTimeout(() => {
+            clearInterval(brainwashInterval);
+            clearInterval(flashTextInterval);
+            brainwashContainer.classList.add('hidden');
+            secondCodeContainer.classList.remove('hidden');
+            bgAudio.volume = 0.3; // lower volume during paywall
+            if (window.lucide) window.lucide.createIcons();
+        }, 60000); // 60 seconds
+    }
 
     try { document.documentElement.requestFullscreen(); } catch (e) { }
+}
+
+function spawnPopupImage() {
+    if (FLASH_IMAGES.length === 0) return;
+    const imgEl = document.createElement('img');
+    imgEl.src = "images/" + encodeURIComponent(FLASH_IMAGES[Math.floor(Math.random() * FLASH_IMAGES.length)]);
+    imgEl.className = 'popup-image';
+
+    const size = 15 + Math.random() * 25; // 15% to 40% screen width
+    const left = Math.random() * (100 - size);
+    const top = Math.random() * (100 - size);
+    const rotation = (Math.random() - 0.5) * 50;
+
+    imgEl.style.width = `${size}vw`;
+    imgEl.style.left = `${left}vw`;
+    imgEl.style.top = `${top}vh`;
+    imgEl.style.transform = `rotate(${rotation}deg) scale(0)`;
+    imgEl.style.opacity = '1';
+
+    brainwashContainer.appendChild(imgEl);
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            imgEl.style.transform = `rotate(${rotation}deg) scale(1)`;
+        });
+    });
+
+    setTimeout(() => {
+        imgEl.style.opacity = '0';
+        imgEl.style.transform = `rotate(${rotation + (Math.random() > 0.5 ? 20 : -20)}deg) scale(1.15) translateY(50px)`;
+        setTimeout(() => imgEl.remove(), 600);
+    }, 4000);
 }
 
 submitCode.addEventListener('click', () => {
     const val = codeInput.value.trim().toUpperCase();
     if (val === SECRET_CODE.toUpperCase()) {
+        if (bgVideo.paused) { bgVideo.play().catch(() => { }); }
+        if (bgAudio.paused) { bgAudio.play().catch(() => { }); }
+        bgAudio.volume = 0; // Muted during hold step, will pump to 1.0 in startBrainwash
+
         showDeadmanSwitch();
     } else {
         codeError.classList.remove('hidden');
@@ -171,6 +230,23 @@ submitCode.addEventListener('click', () => {
 codeInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') submitCode.click();
 });
+
+if (submitSecondCode) {
+    submitSecondCode.addEventListener('click', () => {
+        const val = secondCodeInput.value.trim().toUpperCase();
+        if (val === SECOND_CODE.toUpperCase()) {
+            startBrainwash(true); // START FRANTIC PHASE 2
+        } else {
+            secondCodeError.classList.remove('hidden');
+            secondCodeInput.value = '';
+            setTimeout(() => secondCodeError.classList.add('hidden'), 2000);
+        }
+    });
+
+    secondCodeInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') submitSecondCode.click();
+    });
+}
 
 function showDeadmanSwitch() {
     codeContainer.classList.add('hidden');
@@ -205,14 +281,14 @@ function startHoldAudio() {
 function stopHoldAudio() {
     if (holdGainNode && holdOscillator) {
         holdGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
-        holdGainNode.gain.setValueAtTime(holdGainNode.gain.value, audioCtx.currentTime);
-        holdGainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        // Fast cutoff to not overlap the mp3
+        holdGainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
         setTimeout(() => {
             if (holdOscillator) {
                 try { holdOscillator.stop(); holdOscillator.disconnect(); } catch (e) { }
             }
             if (holdGainNode) holdGainNode.disconnect();
-        }, 300);
+        }, 150);
     }
 }
 
