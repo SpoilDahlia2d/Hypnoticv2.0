@@ -35,7 +35,8 @@ body {
     background-color: var(--term-bg);
     color: var(--term-text);
     font-family: var(--font-mono);
-    height: 100vh;
+    height: 100dvh;
+    /* iOS Fix */
     width: 100vw;
     overflow: hidden;
     display: flex;
@@ -321,7 +322,8 @@ body {
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
+    /* iOS Fix */
     z-index: 100;
     display: flex;
     justify-content: center;
@@ -386,7 +388,8 @@ body {
 /* 4. SENSORY OVERLOAD BRAINWASH ADDTIONS */
 .surrender-btn {
     position: absolute;
-    bottom: 12vh;
+    bottom: clamp(60px, 15dvh, 120px);
+    /* Avoid Safari bottom UI entirely */
     left: 50%;
     transform: translateX(-50%);
     font-family: var(--font-sans);
