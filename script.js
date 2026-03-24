@@ -90,7 +90,7 @@ async function startTerminal() {
             cursorBlink.classList.add('hidden');
             setTimeout(showCodeInput, 800);
         }
-    }, 200);
+    }, 600);
 }
 
 function showCodeInput() {
@@ -125,7 +125,7 @@ function startBrainwash() {
             imgEl.className = 'popup-image';
 
             // Random styling for a crazy overlapping look
-            const size = 30 + Math.random() * 45; // 30% to 75% screen width
+            const size = 15 + Math.random() * 25; // 15% to 40% screen width
             const left = Math.random() * (100 - size);
             const top = Math.random() * (100 - size);
             const rotation = (Math.random() - 0.5) * 50; // -25deg to +25deg
@@ -177,6 +177,45 @@ function showDeadmanSwitch() {
     deadmanContainer.classList.remove('hidden');
 }
 
+// Web Audio API for Hold Sound
+let audioCtx;
+let holdOscillator;
+let holdGainNode;
+
+function startHoldAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    holdOscillator = audioCtx.createOscillator();
+    holdGainNode = audioCtx.createGain();
+
+    holdOscillator.type = 'sawtooth';
+    holdOscillator.frequency.setValueAtTime(50, audioCtx.currentTime);
+    holdOscillator.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 10);
+
+    holdGainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+    holdGainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.5);
+    holdGainNode.gain.linearRampToValueAtTime(1.0, audioCtx.currentTime + 9.5);
+
+    holdOscillator.connect(holdGainNode);
+    holdGainNode.connect(audioCtx.destination);
+    holdOscillator.start();
+}
+
+function stopHoldAudio() {
+    if (holdGainNode && holdOscillator) {
+        holdGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+        holdGainNode.gain.setValueAtTime(holdGainNode.gain.value, audioCtx.currentTime);
+        holdGainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        setTimeout(() => {
+            if (holdOscillator) {
+                try { holdOscillator.stop(); holdOscillator.disconnect(); } catch (e) { }
+            }
+            if (holdGainNode) holdGainNode.disconnect();
+        }, 300);
+    }
+}
+
 // Deadman Switch Logic
 let holdTimer = null;
 let holdStartTime = null;
@@ -188,6 +227,7 @@ function startHold(e) {
     if (isHolding) return;
 
     isHolding = true;
+    startHoldAudio();
     holdStartTime = Date.now();
     switchText.innerText = "HOLDING...";
     switchButton.style.borderColor = "var(--term-accent)";
@@ -216,6 +256,7 @@ function endHold(e) {
     if (!isHolding) return;
 
     isHolding = false;
+    stopHoldAudio();
     cancelAnimationFrame(holdTimer);
 
     if (progressFill.style.height !== "100%") {
