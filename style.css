@@ -380,7 +380,6 @@ body {
     letter-spacing: 1vw;
     text-shadow: 0 0 40px var(--term-accent);
     pointer-events: none;
-    mix-blend-mode: overlay;
     text-align: center;
 }
 
