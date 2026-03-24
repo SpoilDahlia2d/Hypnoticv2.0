@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Hypnotic Shrine V2.0</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+
+<body>
+    <div class="app-container">
+
+        <!-- 1. TERMINAL BOOT -->
+        <div class="terminal-container" id="terminal-container">
+            <div class="terminal-output" id="terminal-output">
+                <div class="terminal-header">
+                    <i data-feather="terminal" style="width:16px;height:16px;"></i> <span>SYSTEM_TERMINAL_v2.0</span>
+                </div>
+                <div class="terminal-body" id="terminal-lines"></div>
+                <div class="cursor-blink" id="cursor-blink">_</div>
+            </div>
+        </div>
+
+        <!-- 2. CODE INPUT MODAL -->
+        <div class="code-input-container hidden" id="code-container">
+            <div class="glass-panel text-center">
+                <i data-feather="lock" class="mb-1"
+                    style="color:var(--term-accent); width:32px; height:32px; margin: 0 auto;"></i>
+                <h2>AWAITING CODE</h2>
+                <p>Provide the access sequence to proceed.</p>
+                <div class="input-group">
+                    <input type="text" id="code-input" placeholder="ENTER CODE..." autocomplete="off"
+                        spellcheck="false">
+                    <button id="submit-code">SUBMIT</button>
+                </div>
+                <div id="code-error" class="hidden error-text">INVALID SEQUENCE.</div>
+            </div>
+        </div>
+
+        <!-- 3. DEADMAN SWITCH (FINGERPRINT HOLD) -->
+        <div class="deadman-container hidden" id="deadman-container">
+            <div class="switch-button" id="switch-button">
+                <i data-lucide="fingerprint" style="width: 32px; height: 32px; color: var(--term-accent);"></i>
+                <span class="switch-text" id="switch-text">HOLD TO SUBMIT</span>
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <p class="tribute-link" style="margin-top: 2rem; font-family: var(--font-sans); font-size: 0.9rem;">
+                <a href="https://throne.com/" target="_blank" rel="noreferrer"
+                    style="color: rgba(255,255,255,0.5); text-decoration: underline;">Too weak to wait? Pay your
+                    tribute.</a>
+            </p>
+        </div>
+
+        <!-- 4. SENSORY OVERLOAD BRAINWASH -->
+        <div id="brainwash-container" class="brainwash-container hidden">
+            <!-- Sfondo Video Ipnotico (Metti il tuo video in questa cartella e chiamalo background.mp4) -->
+            <video id="bg-video" class="bg-video" loop playsinline>
+                <source src="background.mp4" type="video/mp4">
+            </video>
+
+            <!-- Traccia Audio Ipnotica (Metti il tuo file audio e chiamalo audio.mp3) -->
+            <audio id="bg-audio" loop>
+                <source src="audio.mp3" type="audio/mpeg">
+            </audio>
+
+            <!-- Testo Subliminale Flashing -->
+            <h1 id="flash-text" class="flash-text hidden">OBEY</h1>
+
+            <!-- Le immagini pop-up animate (tramite Javascript) -->
+        </div>
+
+    </div>
+
+    <!-- Initialization -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        feather.replace();
+        lucide.createIcons();
+    </script>
+    <script src="script.js"></script>
+</body>
+
+</html>
