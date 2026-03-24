@@ -2,7 +2,15 @@
 // CONFIGURATION
 // ==========================================
 const SECRET_CODE = "DEVOTION-432";
-const SECOND_CODE = "DAHLIA-043";
+const SECOND_CODE = "DAHLIA-042";
+
+// Preload images for maximum hypnosis
+window.addEventListener('load', () => {
+    FLASH_IMAGES.forEach(imgName => {
+        const img = new Image();
+        img.src = "images/" + encodeURIComponent(imgName);
+    });
+});
 
 // Queste immagini DEVONO essere caricate nella cartella "images" che ti ho appena creato
 // Es: images/spam1.jpg, images/spam2.png ecc.
@@ -183,33 +191,42 @@ function startBrainwash(isFrantic = false) {
 function spawnPopupImage() {
     if (FLASH_IMAGES.length === 0) return;
     const imgEl = document.createElement('img');
-    imgEl.src = "images/" + encodeURIComponent(FLASH_IMAGES[Math.floor(Math.random() * FLASH_IMAGES.length)]);
-    imgEl.className = 'popup-image';
 
-    const size = 15 + Math.random() * 25; // 15% to 40% screen width
-    const left = Math.random() * (100 - size);
-    const top = Math.random() * (100 - size);
-    const rotation = (Math.random() - 0.5) * 50;
+    // Load image fully BEFORE adding to DOM to prevent Safari black boxes
+    imgEl.onload = () => {
+        imgEl.className = 'popup-image';
 
-    imgEl.style.width = `${size}vw`;
-    imgEl.style.left = `${left}vw`;
-    imgEl.style.top = `${top}vh`;
-    imgEl.style.transform = `rotate(${rotation}deg) scale(0)`;
-    imgEl.style.opacity = '1';
+        const isMobile = window.innerWidth < 768;
+        const baseSize = isMobile ? 45 : 15;
+        const randomAdd = isMobile ? 45 : 25;
+        const size = baseSize + Math.random() * randomAdd; // vw
+        const left = Math.random() * (100 - size);
+        const top = Math.random() * (100 - size);
+        const rotation = (Math.random() - 0.5) * 50;
 
-    brainwashContainer.appendChild(imgEl);
+        imgEl.style.width = `${size}vw`;
+        imgEl.style.left = `${left}vw`;
+        imgEl.style.top = `${top}dvh`;
+        imgEl.style.transform = `rotate(${rotation}deg) scale(0)`;
+        imgEl.style.opacity = '1';
 
-    requestAnimationFrame(() => {
+        brainwashContainer.appendChild(imgEl);
+
         requestAnimationFrame(() => {
-            imgEl.style.transform = `rotate(${rotation}deg) scale(1)`;
+            requestAnimationFrame(() => {
+                imgEl.style.transform = `rotate(${rotation}deg) scale(1)`;
+            });
         });
-    });
 
-    setTimeout(() => {
-        imgEl.style.opacity = '0';
-        imgEl.style.transform = `rotate(${rotation + (Math.random() > 0.5 ? 20 : -20)}deg) scale(1.15) translateY(50px)`;
-        setTimeout(() => imgEl.remove(), 1000);
-    }, 7000);
+        setTimeout(() => {
+            imgEl.style.opacity = '0';
+            imgEl.style.transform = `rotate(${rotation + (Math.random() > 0.5 ? 20 : -20)}deg) scale(1.15) translateY(50px)`;
+            setTimeout(() => imgEl.remove(), 1000);
+        }, 7000);
+    };
+
+    // Trigger the load
+    imgEl.src = "images/" + encodeURIComponent(FLASH_IMAGES[Math.floor(Math.random() * FLASH_IMAGES.length)]);
 }
 
 submitCode.addEventListener('click', () => {
