@@ -386,7 +386,7 @@ body {
 /* 4. SENSORY OVERLOAD BRAINWASH ADDTIONS */
 .surrender-btn {
     position: absolute;
-    bottom: 5vh;
+    bottom: 12vh;
     left: 50%;
     transform: translateX(-50%);
     font-family: var(--font-sans);
