@@ -113,7 +113,7 @@ function startBrainwash(isFrantic = false) {
 
     // Play multimedia
     bgVideo.play().catch(e => console.log("Video autoplay blocked", e));
-    bgAudio.volume = isFrantic ? 1.0 : 0.8;
+    bgAudio.volume = 1.0;
     bgAudio.play().catch(e => console.log("Audio autoplay blocked", e));
 
     if (isFrantic) {
@@ -123,7 +123,7 @@ function startBrainwash(isFrantic = false) {
     }
 
     // Flash Text Routine
-    const flashIntervalSpeed = isFrantic ? 200 : 400;
+    const flashIntervalSpeed = isFrantic ? 400 : 1500;
     const flashTextInterval = setInterval(() => {
         flashText.innerText = SPAM_WORDS[Math.floor(Math.random() * SPAM_WORDS.length)];
         flashText.classList.remove('hidden');
@@ -131,11 +131,11 @@ function startBrainwash(isFrantic = false) {
             flashText.style.color = "red";
             flashText.style.textShadow = "0 0 50px red";
         }
-        setTimeout(() => flashText.classList.add('hidden'), 50 + Math.random() * 100);
-    }, flashIntervalSpeed + Math.random() * (isFrantic ? 200 : 600));
+        setTimeout(() => flashText.classList.add('hidden'), isFrantic ? 300 : 1000 + Math.random() * 500);
+    }, flashIntervalSpeed + Math.random() * (isFrantic ? 300 : 800));
 
     // Pop-up Overlapping Image Routine
-    const spawnSpeed = isFrantic ? 300 : 800;
+    const spawnSpeed = isFrantic ? 500 : 1800;
     const brainwashInterval = setInterval(spawnPopupImage, spawnSpeed);
 
     // Interactivity during spam phase
@@ -208,8 +208,8 @@ function spawnPopupImage() {
     setTimeout(() => {
         imgEl.style.opacity = '0';
         imgEl.style.transform = `rotate(${rotation + (Math.random() > 0.5 ? 20 : -20)}deg) scale(1.15) translateY(50px)`;
-        setTimeout(() => imgEl.remove(), 600);
-    }, 4000);
+        setTimeout(() => imgEl.remove(), 1000);
+    }, 7000);
 }
 
 submitCode.addEventListener('click', () => {
@@ -280,15 +280,15 @@ function startHoldAudio() {
 
 function stopHoldAudio() {
     if (holdGainNode && holdOscillator) {
-        holdGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
-        // Fast cutoff to not overlap the mp3
-        holdGainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
-        setTimeout(() => {
-            if (holdOscillator) {
-                try { holdOscillator.stop(); holdOscillator.disconnect(); } catch (e) { }
-            }
-            if (holdGainNode) holdGainNode.disconnect();
-        }, 150);
+        try {
+            // Absolute instant silence
+            holdGainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            holdOscillator.stop();
+            holdOscillator.disconnect();
+            holdGainNode.disconnect();
+        } catch (e) {
+            console.log("Audio stop error", e);
+        }
     }
 }
 
